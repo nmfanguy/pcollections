@@ -40,21 +40,76 @@ std::ostream& operator<<(std::ostream& os, const pvector<VAL_T, ROOT_T>& v) {
 
 /* ============================== PUSH/POP ================================= */
 
-// Insert the given value into the vector at the given index.
+// Insert the given value at the back of the vector, reallocating if necessary.
 template <typename VAL_T, typename ROOT_T>
-void pvector<VAL_T, ROOT_T>::insert(const VAL_T& val, int idx) {
+void pvector<VAL_T, ROOT_T>::push_back(const VAL_T& val) {
     flat_transaction::run(pop, [&] {
-        if (idx < cap) {
-            arr[idx] = val;
+        if (len < cap) {
+            arr[len] = val;
         }
         else {
             // reallocate and such
             resize(cap + 1);
-            arr[idx] = val;
+            arr[len] = val;
         }
 
         len++;
     });
+}
+
+// Remove and return the value at the back of the vector.
+template <typename VAL_T, typename ROOT_T>
+VAL_T pvector<VAL_T, ROOT_T>::pop_back() {
+    if (len == 0)
+        throw std::out_of_range("Cannot pop the back of an empty vector.");
+
+    len--;
+    return arr[len];
+}
+
+// Insert the given value at the given index, reallocating if necessary.
+template <typename VAL_T, typename ROOT_T>
+void pvector<VAL_T, ROOT_T>::insert(const VAL_T& val, int idx) {
+    // we edit the pmem
+    flat_transaction::run(pop, [&] {
+        auto new_cap = cap;
+        // get more space if we need it
+        if (len >= cap) {
+            new_cap++;
+        }
+
+        persistent_ptr<VAL_T[]> new_arr = make_persistent<VAL_T[]>(new_cap);
+
+        int offset = 0;
+        for (int i = 0; i < len + 1; i++) {
+            if (i == idx) {
+                new_arr[i] = val;
+                offset = 1;
+            }
+
+            new_arr[i + offset] = arr[i];
+        }
+
+        len++;
+
+        delete_persistent<VAL_T[]>(arr, cap);
+
+        arr = new_arr;
+    });
+}
+
+/* =============================== GET/SET ================================= */
+
+// Get the length of the vector.
+template <typename VAL_T, typename ROOT_T>
+int pvector<VAL_T, ROOT_T>::get_length() const {
+    return len;
+}
+
+// Get the capacity of the vector.
+template <typename VAL_T, typename ROOT_T>
+int pvector<VAL_T, ROOT_T>::get_capacity() const {
+    return cap;
 }
 
 /* ================================ MISC. ================================== */
@@ -95,4 +150,10 @@ void pvector<VAL_T, ROOT_T>::resize(int new_cap) {
         // and always update the capacity
         cap = new_cap;
     });
+}
+
+// Shrink the vector's capacity to its current size, removing unused allocated space.
+template <typename VAL_T, typename ROOT_T>
+void pvector<VAL_T, ROOT_T>::shrink() {
+    resize(len);
 }

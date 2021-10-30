@@ -48,12 +48,12 @@ int main() {
             proot->ilist->push_back(2);
 
             proot->dvec = make_persistent<pvector<double, root>>(pop, 5);
-            proot->dvec->insert(2, 0);
-            proot->dvec->insert(4, 1);
-            proot->dvec->insert(6, 2);
-            proot->dvec->insert(8, 3);
-            proot->dvec->insert(10, 4);
-            proot->dvec->insert(12, 5);
+            proot->dvec->push_back(2);
+            proot->dvec->push_back(4);
+            proot->dvec->push_back(6);
+            proot->dvec->push_back(8);
+            proot->dvec->push_back(10);
+            proot->dvec->push_back(12);
         });
 
         cout << ">>> LIST <<<" << endl << endl;
@@ -105,6 +105,21 @@ int main() {
         cout << endl << ">>> VECTOR <<<" << endl << endl;
 
         cout << "Original" << endl;
+        cout << *(proot->dvec) << endl << endl;
+
+        auto popped = proot->dvec->pop_back();
+
+        cout << "After popping" << endl;
+        cout << *(proot->dvec) << endl << endl;
+
+        proot->dvec->push_back(popped);
+
+        cout << "After pushing" << endl;
+        cout << *(proot->dvec) << endl << endl;
+
+        proot->dvec->insert(-37, 3);
+
+        cout << "After insertion" << endl;
         cout << *(proot->dvec) << endl << endl;
     }
 

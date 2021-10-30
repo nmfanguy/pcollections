@@ -36,12 +36,18 @@ public:
     friend std::ostream& operator<< <>(std::ostream&, const pvector<VAL_T, ROOT_T>&);
 
     // Push/Pop
+    void push_back(const VAL_T&);
+    VAL_T pop_back();
+
     void insert(const VAL_T&, int);
 
     // Get/Set
+    int get_length() const;
+    int get_capacity() const;
 
     // Misc.
     void refresh_pool(pool<ROOT_T>);
+    void shrink();
 };
 
 #include "pvector.hpp"
