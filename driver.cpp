@@ -1,11 +1,6 @@
 // basic imports
 #include <iostream>
 #include <unistd.h>
-
-// remove me :(
-#include <typeinfo>
-// end remove me :(
-
 // PMDK imports
 #include <libpmemobj++/allocator.hpp>
 #include <libpmemobj++/make_persistent.hpp>
@@ -44,7 +39,7 @@ int main() {
     // get the root of the pool
     auto proot = pop.root();
 
-    // if the first access, populate the list w/ items
+    // if the first access, populate the list & vector w/ items
     if (first_access) {
         flat_transaction::run(pop, [&] { 
             proot->ilist = make_persistent<plist<int, root>>(pop);
@@ -52,15 +47,27 @@ int main() {
             proot->ilist->push_back(1);
             proot->ilist->push_back(2);
 
-            proot->dvec = make_persistent<pvector<double, root>>(pop);
+            proot->dvec = make_persistent<pvector<double, root>>(pop, 5);
+            proot->dvec->insert(2, 0);
+            proot->dvec->insert(4, 1);
+            proot->dvec->insert(6, 2);
+            proot->dvec->insert(8, 3);
+            proot->dvec->insert(10, 4);
+            proot->dvec->insert(12, 5);
         });
 
+        cout << ">>> LIST <<<" << endl << endl;
         cout << *(proot->ilist) << endl;
+
+        cout << endl << ">>> VECTOR <<<" << endl << endl;
+        cout << *(proot->dvec) << endl;
     }
-    // otherwise, access the existing items, pop an item, re-push it, and exit
+    // otherwise, access the existing items and check function implementations
     else {
         proot->ilist->refresh_pool(pop);
-        // proot->dvec->refresh_pool(pop);
+        proot->dvec->refresh_pool(pop);
+
+        cout << ">>> LIST <<<" << endl << endl;
 
         cout << "Before popping" << endl;
         cout << *(proot->ilist) << endl << endl;
@@ -94,6 +101,11 @@ int main() {
 
         cout << "After removing middle" << endl;
         cout << (*proot->ilist) << endl << endl;
+
+        cout << endl << ">>> VECTOR <<<" << endl << endl;
+
+        cout << "Original" << endl;
+        cout << *(proot->dvec) << endl << endl;
     }
 
     return 0;

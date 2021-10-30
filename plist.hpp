@@ -107,6 +107,8 @@ VAL_T plist<VAL_T, ROOT_T>::operator[](int idx) const {
 // Print the items in the plist to the given output stream, separated by commas.
 template <typename VAL_T, typename ROOT_T>
 std::ostream& operator<<(std::ostream& os, const plist<VAL_T, ROOT_T>& l) {
+    os << "[";
+
     auto current = l.head;
     int i = 0;
 
@@ -122,6 +124,8 @@ std::ostream& operator<<(std::ostream& os, const plist<VAL_T, ROOT_T>& l) {
     if (l.len > 0) {
         os << current->get_value();
     }
+
+    os << "]";
 
     return os;
 }
