@@ -6,6 +6,19 @@
 
 /* ============================ CONSTRUCTORS =============================== */
 
+// Create a new, empty pvector with no capacity. 
+template <typename VAL_T, typename ROOT_T>
+pvector<VAL_T, ROOT_T>::pvector(pool<ROOT_T> pop_in) {
+    pop = pop_in;
+
+    // we have no capacity, so set to nullptr instead of allocating
+    flat_transaction::run(pop, [&] {
+        arr = nullptr;
+        len = 0;
+        cap = 0;
+    });
+}
+
 // Create a new, empty pvector with the given capacity.
 template <typename VAL_T, typename ROOT_T>
 pvector<VAL_T, ROOT_T>::pvector(pool<ROOT_T> pop_in, int capacity) {
@@ -70,32 +83,54 @@ VAL_T pvector<VAL_T, ROOT_T>::pop_back() {
 // Insert the given value at the given index, reallocating if necessary.
 template <typename VAL_T, typename ROOT_T>
 void pvector<VAL_T, ROOT_T>::insert(const VAL_T& val, int idx) {
+    if (idx < 0 || idx > len) 
+        throw std::out_of_range("Cannot insert past the range of the vector.");
+    
     // we edit the pmem
     flat_transaction::run(pop, [&] {
-        auto new_cap = cap;
-        // get more space if we need it
-        if (len >= cap) {
-            new_cap++;
-        }
+        // resize array to 1 larger if we are at capacity
+        if (len >= cap)
+            resize(cap + 1);   
 
-        persistent_ptr<VAL_T[]> new_arr = make_persistent<VAL_T[]>(new_cap);
-
-        int offset = 0;
-        for (int i = 0; i < len + 1; i++) {
+        // iterate backwards, moving items forward until we hit the target index
+        for (int i = len; i >= 0; i--) {
+            // if we have hit insertion index, set item to be the given value
             if (i == idx) {
-                new_arr[i] = val;
-                offset = 1;
+                arr[i] = val;
+                // we break as we do not need to edit the items before this in the list
+                break;
             }
-
-            new_arr[i + offset] = arr[i];
+            // otherwise, make current item be the one that used to be one previous 
+            else {
+              arr[i] = arr[i - 1];
+            }
         }
 
+        // we inserted an item, so increase the length
         len++;
-
-        delete_persistent<VAL_T[]>(arr, cap);
-
-        arr = new_arr;
     });
+}
+
+// Remove the item at the given index and return the removed value.
+template <typename VAL_T, typename ROOT_T>
+VAL_T pvector<VAL_T, ROOT_T>::remove(int idx) {
+    if (idx < 0 || idx >= len)
+        throw std::out_of_range("Cannot remove past the range of the vector.");
+
+    auto val = arr[idx];
+
+    // we will edit the pmem
+    flat_transaction::run(pop, [&] {
+        len--;
+
+        // starting at removal index, step over each item
+        for (int i = idx; i < len; i++) {
+            // move all items down one
+            arr[i] = arr[i + 1];
+        }
+    });
+
+    return val;
 }
 
 /* =============================== GET/SET ================================= */

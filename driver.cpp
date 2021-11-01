@@ -6,8 +6,8 @@
 #include <libpmemobj++/make_persistent.hpp>
 #include <libpmemobj++/transaction.hpp>
 // local collection imports
-#include "plist.h"
-#include "pvector.h"
+#include "plist/plist.h"
+#include "pvector/pvector.h"
 
 #define POOLSIZE ((size_t)(1024 * 1024 * 256)) // 256 MB
 #define PMFILE "pool"
@@ -47,7 +47,7 @@ int main() {
             proot->ilist->push_back(1);
             proot->ilist->push_back(2);
 
-            proot->dvec = make_persistent<pvector<double, root>>(pop, 5);
+            proot->dvec = make_persistent<pvector<double, root>>(pop);
             proot->dvec->push_back(2);
             proot->dvec->push_back(4);
             proot->dvec->push_back(6);
@@ -120,6 +120,11 @@ int main() {
         proot->dvec->insert(-37, 3);
 
         cout << "After insertion" << endl;
+        cout << *(proot->dvec) << endl << endl;
+
+        proot->dvec->remove(3);
+
+        cout << "After removal" << endl;
         cout << *(proot->dvec) << endl << endl;
     }
 

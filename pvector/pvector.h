@@ -30,6 +30,7 @@ private:
 
 public:
     // Constructors
+    pvector(pool<ROOT_T>);
     pvector(pool<ROOT_T>, int);
 
     // Operator Overloads
@@ -40,6 +41,7 @@ public:
     VAL_T pop_back();
 
     void insert(const VAL_T&, int);
+    VAL_T remove(int);
 
     // Get/Set
     int get_length() const;
