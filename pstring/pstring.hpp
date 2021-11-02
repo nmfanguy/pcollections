@@ -56,6 +56,42 @@ std::ostream& operator<<(std::ostream& os, const pstring<ROOT_T>& ps) {
     return os;
 }
 
+// Concatenate the other string onto this one.
+template <typename ROOT_T>
+pstring<ROOT_T>& pstring<ROOT_T>::operator+=(const pstring<ROOT_T>& other) {
+    // we edit the pmem
+    flat_transaction::run(pop, [&] {
+        // the new capacity is the two lens + '\0'
+        auto new_cap = len + other.len + 1;
+
+        // allocate new space for the bigger string
+        auto new_str = make_persistent<char[]>(new_cap);
+
+        // copy over the current array to the new one
+        for (int i = 0; i < len; i++) {
+            new_str[i] = arr[i];
+        }
+
+        // copy over the other array to the end of the new one
+        for (int i = 0; i < other.len; i++) {
+            new_str[i + len] = other.arr[i];
+        }
+
+        // insert the null-terminator 
+        new_str[len] = '\0';
+
+        // delete the old array
+        delete_persistent<char[]>(arr, cap);
+        
+        // and update these values
+        arr = new_str;
+        len = new_cap - 1;
+        cap = new_cap;
+    });
+
+    return *this;
+}
+
 /* =============================== GET/SET ================================= */
 
 // Get the number of characters in the current pstring.

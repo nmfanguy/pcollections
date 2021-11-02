@@ -137,6 +137,15 @@ int main() {
 
         cout << "Original" << endl;
         cout << *(proot->pstr) << endl << endl;
+
+        flat_transaction::run(pop, [&] {
+            auto other = make_persistent<pstring<root>>(pop, " my guy??");
+            *(proot->pstr) += *(other);
+            delete_persistent<pstring<root>>(other);
+        });
+
+        cout << "After concatenation" << endl;
+        cout << *(proot->pstr) << endl << endl;
     }
 
     return 0;
