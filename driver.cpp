@@ -8,6 +8,7 @@
 // local collection imports
 #include "plist/plist.h"
 #include "pvector/pvector.h"
+#include "pstring/pstring.h"
 
 #define POOLSIZE ((size_t)(1024 * 1024 * 256)) // 256 MB
 #define PMFILE "pool"
@@ -17,12 +18,11 @@ using namespace pmem;
 using namespace pmem::obj;
 using namespace std;
 
-class entry;
-
 class root {
 public:
     persistent_ptr<plist<int, root>> ilist;
     persistent_ptr<pvector<double, root>> dvec;
+    persistent_ptr<pstring<root>> pstr;
 };
 
 int main() {
@@ -54,6 +54,8 @@ int main() {
             proot->dvec->push_back(8);
             proot->dvec->push_back(10);
             proot->dvec->push_back(12);
+
+            proot->pstr = make_persistent<pstring<root>>(pop, "what's up");
         });
 
         cout << ">>> LIST <<<" << endl << endl;
@@ -61,11 +63,15 @@ int main() {
 
         cout << endl << ">>> VECTOR <<<" << endl << endl;
         cout << *(proot->dvec) << endl;
+
+        cout << endl << ">>> STRING <<<" << endl << endl;
+        cout << *(proot->pstr) << endl;
     }
     // otherwise, access the existing items and check function implementations
     else {
         proot->ilist->refresh_pool(pop);
         proot->dvec->refresh_pool(pop);
+        proot->pstr->refresh_pool(pop);
 
         cout << ">>> LIST <<<" << endl << endl;
 
@@ -126,6 +132,11 @@ int main() {
 
         cout << "After removal" << endl;
         cout << *(proot->dvec) << endl << endl;
+
+        cout << endl << ">>> STRING <<<" << endl << endl;
+
+        cout << "Original" << endl;
+        cout << *(proot->pstr) << endl << endl;
     }
 
     return 0;

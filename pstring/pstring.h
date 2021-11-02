@@ -1,6 +1,7 @@
 #ifndef _PSTRING_H
-#define _PSTRING_
+#define _PSTRING_H
 
+#include <cstring>
 #include <iostream>
 #include <libpmemobj++/make_persistent.hpp>
 #include <libpmemobj++/persistent_ptr.hpp>
@@ -25,19 +26,29 @@ private:
     persistent_ptr<char[]> arr;
     // number of actual characters
     p<int> len;
-    // numbers of characters + \0 -- always len + 1
+    // number of characters + \0 -- always len + 1
     p<int> cap;
+
+    pool<ROOT_T> pop;
 
     void resize(int);
 
 public:
     // Constructors
     pstring(pool<ROOT_T>);
-    pstring(pool<ROOT_T>, char*);
-    pstring(pool<ROOT_T>, int);
+    pstring(pool<ROOT_T>, const char*);
 
     // Operator Overloads
-    std::ostream& operator<< <>(std::ostream&, const pstring<ROOT_T>&);
+    char operator[](int);
+    friend std::ostream& operator<< <>(std::ostream&, const pstring<ROOT_T>&);
+
+    // Get/Set
+    int get_length() const;
+    int get_capacity() const;
+    bool is_empty() const;
+
+    // Misc.
+    void refresh_pool(pool<ROOT_T>);
 
 };
 
