@@ -51,6 +51,7 @@ public:
 
     // Misc.
     void refresh_pool(pool<ROOT_T>);
+    void destroy();
 
 };
 

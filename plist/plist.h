@@ -77,6 +77,7 @@ public:
     // Misc.
     void clear();
     void refresh_pool(pool<ROOT_T>);
+    void destroy();
 };
 
 #include "plist.hpp"

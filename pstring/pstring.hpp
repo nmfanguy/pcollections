@@ -148,3 +148,21 @@ void pstring<ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
         pop = new_pop;
     });
 }
+
+// Completely delete the pmem for this object.
+template <typename ROOT_T>
+void pstring<ROOT_T>::destroy() {
+    // we are destroying this object, so run a transaction
+    flat_transaction::run(pop, [&] {
+        // probably unnecessary, but delete the underlying array first
+        delete_persistent<char[]>(arr, cap);
+
+        // unset these variables
+        arr = nullptr;
+        len = 0;
+        cap = 0;
+
+        // then completely deallocate this object itself 
+        delete_persistent<pstring<ROOT_T>>(this);
+    });
+}

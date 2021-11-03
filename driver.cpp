@@ -141,7 +141,7 @@ int main() {
         flat_transaction::run(pop, [&] {
             auto other = make_persistent<pstring<root>>(pop, " my guy??");
             *(proot->pstr) += *(other);
-            delete_persistent<pstring<root>>(other);
+            other->destroy();
         });
 
         cout << "After concatenation" << endl;

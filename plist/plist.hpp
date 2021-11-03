@@ -334,7 +334,7 @@ bool plist<VAL_T, ROOT_T>::is_empty() const {
 
 /* ================================ MISC. ================================== */
 
-// Completely clear the list, removing all elements.
+// Completely clear the list, removing all elements but leaving this object allocated.
 template <typename VAL_T, typename ROOT_T>
 void plist<VAL_T, ROOT_T>::clear() {
     auto current = head;
@@ -377,5 +377,15 @@ void plist<VAL_T, ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
     // finally, run a transaction in the new pool to update this pool variable
     flat_transaction::run(new_pop, [&] {
         pop = new_pop;
+    });
+}
+
+// Completely destroy this object and its allocated memory.
+template <typename VAL_T, typename ROOT_T>
+void plist<VAL_T, ROOT_T>::destroy() {
+    clear();
+
+    flat_transaction::run(pop, [&] {
+        delete_persistent<plist<VAL_T, ROOT_T>>(this);
     });
 }

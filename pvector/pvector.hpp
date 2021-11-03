@@ -192,3 +192,25 @@ template <typename VAL_T, typename ROOT_T>
 void pvector<VAL_T, ROOT_T>::shrink() {
     resize(len);
 }
+
+// Remove and deallocate all the items in the vector.
+template <typename VAL_T, typename ROOT_T>
+void pvector<VAL_T, ROOT_T>::clear() {
+    flat_transaction::run(pop, [&] {
+        delete_persistent<VAL_T[]>(arr, cap);
+
+        arr = nullptr;
+        len = 0;
+        cap = 0;
+    });
+}
+
+// Completely destroy this object and its allocated memory.
+template <typename VAL_T, typename ROOT_T>
+void pvector<VAL_T, ROOT_T>::destroy() {
+    clear();
+
+    flat_transaction::run(pop, [&] {
+        delete_persistent<pvector<VAL_T, ROOT_T>>(this);
+    });
+}

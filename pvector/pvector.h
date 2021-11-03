@@ -50,6 +50,8 @@ public:
     // Misc.
     void refresh_pool(pool<ROOT_T>);
     void shrink();
+    void clear();
+    void destroy();
 };
 
 #include "pvector.hpp"
