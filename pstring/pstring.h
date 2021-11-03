@@ -42,6 +42,7 @@ public:
     char operator[](int);
     friend std::ostream& operator<< <>(std::ostream&, const pstring<ROOT_T>&);
     pstring<ROOT_T>& operator+=(const pstring<ROOT_T>&);
+    pstring<ROOT_T>& operator=(const pstring<ROOT_T>&);
 
     // Get/Set
     int get_length() const;

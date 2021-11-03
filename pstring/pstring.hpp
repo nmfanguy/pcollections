@@ -50,6 +50,7 @@ char pstring<ROOT_T>::operator[](int idx) {
 // Output the pstring to the given output stream.
 template <typename ROOT_T>
 std::ostream& operator<<(std::ostream& os, const pstring<ROOT_T>& ps) {
+    // print out chars one by one
     for (int i = 0; i < ps.len; i++)
         os << ps.arr[i];
 
@@ -61,7 +62,7 @@ template <typename ROOT_T>
 pstring<ROOT_T>& pstring<ROOT_T>::operator+=(const pstring<ROOT_T>& other) {
     // we edit the pmem
     flat_transaction::run(pop, [&] {
-        // the new capacity is the two lens + '\0'
+        // the new capacity is the two lens + space for the '\0'
         auto new_cap = len + other.len + 1;
 
         // allocate new space for the bigger string
@@ -77,16 +78,41 @@ pstring<ROOT_T>& pstring<ROOT_T>::operator+=(const pstring<ROOT_T>& other) {
             new_str[i + len] = other.arr[i];
         }
 
-        // insert the null-terminator 
-        new_str[len] = '\0';
-
         // delete the old array
         delete_persistent<char[]>(arr, cap);
-        
+
         // and update these values
         arr = new_str;
         len = new_cap - 1;
         cap = new_cap;
+
+        // insert the null-terminator 
+        arr[len] = '\0';
+    });
+
+    return *this;
+}
+
+// Assign the contents of the other pstring to this one.
+template <typename ROOT_T>
+pstring<ROOT_T>& pstring<ROOT_T>::operator=(const pstring<ROOT_T>& other) {
+    // edit the current pmem
+    flat_transaction::run(pop, [&] {
+        // delete the old array
+        delete_persistent<char[]>(arr, cap);
+
+        // copy over basic values & allocate new pmem
+        len = other.len;
+        cap = other.cap;
+        arr = make_persistent<char[]>(cap);
+
+        // copy all the chars over
+        for (int i = 0; i < len; i++) {
+            arr[i] = other.arr[i];
+        }
+
+        // add the null-terminator
+        arr[len] = '\0';
     });
 
     return *this;
