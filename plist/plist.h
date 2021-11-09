@@ -69,9 +69,7 @@ public:
     VAL_T remove(int);
 
     // Get/Set
-    [[nodiscard]]
     int get_length() const;
-    [[nodiscard]]
     bool is_empty() const;
     
     // Misc.
