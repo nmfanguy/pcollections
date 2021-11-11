@@ -144,9 +144,7 @@ bool pstring<ROOT_T>::is_empty() const {
 // be done when loading this string from an existing pool.
 template <typename ROOT_T>
 void pstring<ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
-    flat_transaction::run(new_pop, [&] {
-        pop = new_pop;
-    });
+    pop = new_pop;
 }
 
 // Completely delete the pmem for this object.

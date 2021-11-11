@@ -9,6 +9,7 @@
 #include "plist/plist.h"
 #include "pvector/pvector.h"
 #include "pstring/pstring.h"
+#include "phashtable/phashtable.h"
 
 #define POOLSIZE ((size_t)(1024 * 1024 * 256)) // 256 MB
 #define PMFILE "pool"
@@ -23,6 +24,7 @@ public:
     persistent_ptr<plist<int, root>> ilist;
     persistent_ptr<pvector<double, root>> dvec;
     persistent_ptr<pstring<root>> pstr;
+    persistent_ptr<phashtable<double, int, root>> hasht;
 };
 
 int main() {
@@ -56,6 +58,8 @@ int main() {
             proot->dvec->push_back(12);
 
             proot->pstr = make_persistent<pstring<root>>(pop, "what's up");
+
+            proot->hasht = make_persistent<phashtable<double, int, root>>(pop);
         });
 
         cout << ">>> LIST <<<" << endl << endl;
@@ -66,12 +70,15 @@ int main() {
 
         cout << endl << ">>> STRING <<<" << endl << endl;
         cout << *(proot->pstr) << endl;
+
+        cout << endl << ">>> HASHTABLE <<<" << endl << endl;
     }
     // otherwise, access the existing items and check function implementations
     else {
         proot->ilist->refresh_pool(pop);
         proot->dvec->refresh_pool(pop);
         proot->pstr->refresh_pool(pop);
+        proot->hasht->refresh_pool(pop);
 
         cout << ">>> LIST <<<" << endl << endl;
 
@@ -146,6 +153,8 @@ int main() {
 
         cout << "After concatenation" << endl;
         cout << *(proot->pstr) << endl << endl;
+
+        cout << endl << ">>> HASHTABLE <<<" << endl << endl;
     }
 
     return 0;

@@ -57,10 +57,7 @@ persistent_ptr<pnode<VAL_T, ROOT_T>> pnode<VAL_T, ROOT_T>::get_next() const {
 // an existing pool file from disk.
 template <typename VAL_T, typename ROOT_T>
 void pnode<VAL_T, ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
-    // run a transaction in the new pool
-    flat_transaction::run(new_pop, [&] {
-        pop = new_pop;
-    });
+    pop = new_pop;
 }
 
 /* ========================================================================= */
@@ -374,10 +371,7 @@ void plist<VAL_T, ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
         i++;
     }
 
-    // finally, run a transaction in the new pool to update this pool variable
-    flat_transaction::run(new_pop, [&] {
-        pop = new_pop;
-    });
+    pop = new_pop;
 }
 
 // Completely destroy this object and its allocated memory.

@@ -153,9 +153,7 @@ int pvector<VAL_T, ROOT_T>::get_capacity() const {
 // when using a pvector from an existing file (e.g. not just created at runtime).
 template <typename VAL_T, typename ROOT_T>
 void pvector<VAL_T, ROOT_T>::refresh_pool(pool<ROOT_T> new_pop) {
-    flat_transaction::run(new_pop, [&] {
-        pop = new_pop;
-    });
+    pop = new_pop;
 }
 
 // Resize the underlying array to the new given capacity. If the given capacity is less than the
