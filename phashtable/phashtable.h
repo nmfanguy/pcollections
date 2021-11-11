@@ -22,32 +22,10 @@ struct ppair {
     p<VAL_T> val;
 };
 
-template <typename KEY_T, typename VAL_T>
-class hashnode {
-private:
-    ppair<KEY_T, VAL_T> pair;
-    persistent_ptr<hashnode<KEY_T, VAL_T>> next;
-};
-
-template <typename KEY_T, typename VAL_T, typename ROOT_T>
-class hashlist {
-private:
-    persistent_ptr<hashnode<KEY_T, VAL_T>> head;
-    persistent_ptr<hashnode<KEY_T, VAL_T>> tail;
-    p<int> len;
-    pool<ROOT_T> pop;
-
-public:
-    void refresh_pool(pool<ROOT_T> pop_in) {
-        pop = pop_in;
-    }
-};
-
 template<typename KEY_T, typename VAL_T, typename ROOT_T>
 class phashtable {
 private:
-    //persistent_ptr<pvector<plist<ppair<KEY_T, VAL_T>, ROOT_T>, ROOT_T>> data;
-    persistent_ptr<pvector<hashlist<KEY_T, VAL_T, ROOT_T>, ROOT_T>> data;
+    persistent_ptr<pvector<plist<ppair<KEY_T, VAL_T>, ROOT_T>, ROOT_T>> data;
     p<int> len;
     pool<ROOT_T> pop;
     persistent_ptr<std::hash<KEY_T>> hash_function;
@@ -56,7 +34,7 @@ private:
     void rehash();
     int hash(const KEY_T&) const;
     unsigned long prime_below(unsigned long);
-    void set_primes(std::vector<unsigned long>&);
+    void set_primes(std::vector<bool>&);
 
 public:
     // Constructors

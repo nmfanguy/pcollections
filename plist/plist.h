@@ -53,6 +53,8 @@ private:
 public:
     // Constructor
     explicit plist(pool<ROOT_T>);
+    // required for phashtable implementation -- DO NOT CALL DIRECTLY
+    plist() = default;
 
     // Operator Overloads
     VAL_T operator[](int) const;
